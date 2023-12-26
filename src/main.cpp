@@ -1,9 +1,16 @@
-#include "DataStruc.hpp"
-#include "DataManager.cpp"
+#include "DataStruct.hpp"
+#include "DataManager.hpp"
 
 int main(){
 
-    DataSet_struct trajectory;
-    DataManager FileManager;
+    data_management::DataSet2_struct* trajectory;
+    data_management::DataManager FileManager;
+
+    const std::string source_path = "data/dataset.txt";
+    const std::string destination_path = "data/dataset_generated.txt";
+    trajectory = FileManager.read_data2(source_path);
+    
+    delete trajectory;
+    //trajectory = FileManager.write_data(destination_path);
 
 }
