@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include "header/DataStruct.hpp"
 #include "header/DataManager.hpp"
@@ -12,7 +14,18 @@ namespace data_management{
 
     //funct
     DataSet_struct* DataManager::read_data(const std::string& source_path){
+        
         std::cout << "read data manager" << source_path << std::endl;
+        std::ifstream file(source_path);
+        std::string line; 
+        if (file.is_open()){
+            while(file.good()){
+            // create pipe stream 
+            file >> line;       
+            std::cout << line; 
+            }
+        }
+        
         DataSet_struct* data = new DataSet_struct;
         data->x = 5;
         data->y = 10;
