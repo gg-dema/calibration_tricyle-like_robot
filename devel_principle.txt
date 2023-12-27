@@ -1,0 +1,13 @@
+On the usage of vector instead of array of fixed, size:
+    pro: polyedrico: posso allocare dinamicamente se serve ma anche 
+                     riservando byte4byte.
+
+generalized structure: future upgrade
+    compose 2 struct (
+            - 1 for data
+            - 1 for header info: timestamp, name, opt
+    )
+    good principle: link all to ros2 msgs. Create interface for ros comunication system.
+
+
+-------------------

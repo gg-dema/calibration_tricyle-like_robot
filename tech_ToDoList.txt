@@ -1,0 +1,2 @@
+Technical details: upgrade Ereditarieta' between dataStruct1,2...,n for better code testing.
+Start to think about testing component of my code;
