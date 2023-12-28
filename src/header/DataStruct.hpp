@@ -1,15 +1,11 @@
 #pragma once 
 #include <vector>
+#include <string>
 
 namespace data_management
 {
-    struct DataSet_struct{ 
-        int x;
-        int y;
-        int len;
-    };
-
-    struct DataSet2_struct{
+    struct DataSet_struct{
+        std::vector<std::string> txt;
         std::vector<double> x;
         std::vector<double> y;
         int len;

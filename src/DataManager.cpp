@@ -13,53 +13,43 @@ namespace data_management{
         std::cout << "init data manager" << std::endl;
     }
 
-    //funct
-    DataSet_struct* DataManager::read_data(const std::string& source_path){
-        
-        std::cout << "read data manager" << source_path << std::endl;
-       
-        std::ifstream file(source_path);
-        std::string line; 
-       
-        if (file.is_open()){
-            while(file.good()){
-            // create pipe stream 
-            file >> line;       
-            if (file.eof()){break;}
-            std::cout << line; 
-            break;
-
-            }
-        }
-        file.close();
-        
-        DataSet_struct* data = new DataSet_struct;
-        data->x = 5;
-        data->y = 10;
-        data->len = 100;
-        return data;
-    }
-    
+    //funct  
     void DataManager::write_data(const std::string& destination_path){ 
         std::cout << "write data manager to: " << destination_path << std::endl;
         
     }
 
-    DataSet2_struct* DataManager::read_data2(const std::string& source_path){   
+    DataSet_struct* DataManager::read_data(const std::string& source_path){   
+        
+        DataSet_struct* data = new DataSet_struct;
+        std::ifstream file(source_path);
+        std::string line; 
+        std::vector<std::string> data_lines;
+        std::vector<double> tmp_x;
+        // pre-allocate size of txt file
+
+        if (file.is_open()){
+            while(std::getline(file, line)){
+                tmp_x.push_back(unpack_row(line));
+                data_lines.push_back(line);
+            }
+        file.close();
         std::cout << "read data 2 manager" << source_path << std::endl;
-        DataSet2_struct* data = new DataSet2_struct;
-        std::vector<double> x;
-        std::vector<double> y;
-        data->len = 0;
-        data->x = x;
-        data->y = y;
+        
+        data->txt = data_lines;
+        data->len = data_lines.size();
+        data->x = tmp_x;
         return data;
-
-
+        }
+        else{
+            delete data;
+            return nullptr;
+        }
     }
 
-    std::vector<double>* DataManager::unpack_row(const std::string& row){
-        return new std::vector<double>;
+    double DataManager::unpack_row(const std::string& row){
+        return 5.0;
     }
+    std::vector<double> DataManager::unpack_row_full(const std::string& row){}
     std::string* DataManager::pack_sample(const std::vector<double>& sample){}
 }; //end data_management namespace
