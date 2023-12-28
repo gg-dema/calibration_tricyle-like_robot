@@ -9,10 +9,11 @@ class DataManager{
 public:
     DataManager();
     DataSet_struct* read_data(const std::string& source_path);
-    std::vector<double> unpack_row_full(const std::string& row);
+    void write_data(const std::string& destination_path);
+
+private:
     double unpack_row(const std::string& row);
     std::string* pack_sample(const std::vector<double>& sample);
-    void write_data(const std::string& destination_path);
 
 };
 };//end data_management namespace

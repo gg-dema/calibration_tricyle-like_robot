@@ -10,7 +10,10 @@ int main(){
     const std::string source_path = "../data/dataset.txt";
     const std::string destination_path = "../data/dataset_generated.txt";
     trajectory = FileManager.read_data(source_path);
-    std::cout << trajectory->txt[0] << std::endl;
+    std::cout << trajectory->txt.size() << std::endl;
+    std::cout << trajectory->x.size() << std::endl;
+    std::cout << trajectory->len << std::endl;
+
 
     delete trajectory;
     
