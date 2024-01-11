@@ -17,9 +17,9 @@ int main(){
 
     cout << q_2[0] << " " << q_2[1] << " " << q_2[2]  << " " <<  q_2[3] << "\n";
 
-    //q_2 = robot.forward_kinematic_model(0.5, 0.5);
+    q_2 = robot.forward_kinematic_model(0.5, 0.5);
 
-    //cout << q_2[0] << " " << q_2[1] << " " << q_2[2]  << " " <<  q_2[3] << endl;
+    cout << q_2[0] << " " << q_2[1] << " " << q_2[2]  << " " <<  q_2[3] << endl;
 
     /*int rand_numb = 2433;
     cout << "looks at line " << rand_numb + 9 << "\n";

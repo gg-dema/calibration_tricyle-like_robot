@@ -53,10 +53,10 @@ state_vect TractionDriveRobotModel::forward_kinematic_model(double steering_v, d
      phi_dot = w
     */
    state_vect velocity_state_vect; 
-   velocity_state_vect[1] = driving_v * std::cos(this->_q_state_vect[3]) * std::cos(this->_q_state_vect[4]);
-   velocity_state_vect[2] = driving_v * std::sin(this->_q_state_vect[3]) * std::cos(this->_q_state_vect[4]);
-   velocity_state_vect[3] = (driving_v * std::sin(this->_q_state_vect[4])) / _parameters.axis_lenght; 
-   velocity_state_vect[4] = steering_v;
+   velocity_state_vect[0] = driving_v * std::cos(this->_q_state_vect[3]) * std::cos(this->_q_state_vect[4]);
+   velocity_state_vect[1] = driving_v * std::sin(this->_q_state_vect[3]) * std::cos(this->_q_state_vect[4]);
+   velocity_state_vect[2] = (driving_v * std::sin(this->_q_state_vect[4])) / _parameters.axis_lenght; 
+   velocity_state_vect[3] = steering_v;
    return velocity_state_vect;
 }
 
