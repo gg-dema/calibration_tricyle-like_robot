@@ -1,25 +1,27 @@
 #include "DataSet.hpp"
 #include "RobotModel.hpp"
+#include "calibration_utility.hpp"
 #include <iostream>
 #include <iomanip>
 
- using namespace std;
- using namespace RobotModel;
+using namespace std;
+using namespace RobotModel;
+
 int main(){
  
     const string source_path = "../data/dataset.txt";
     const string destination_path = "../data/dataset_generated.txt";
     data_management::DataSet dataSet = data_management::DataSet(source_path);
-    state_vect q;
-    q[0]=0; q[1]=0; q[2]=0; q[3]=0;
-    TractionDriveRobotModel robot = TractionDriveRobotModel(q); 
-    state_vect q_2 = robot.forward_kinematic_model(0.5, 0.5);
+    pose2d p;
+    TractionDriveRobotModel robot = TractionDriveRobotModel(); 
 
-    cout << q_2[0] << " " << q_2[1] << " " << q_2[2]  << " " <<  q_2[3] << "\n";
+    TractionDriveRobotModel::state_vect q = robot.forward_kinematic_model(0.5, 0.5);
+    p = robot.dead_reckoning(0.5, 0.0, 1);
+    cout << q[0] << " " << q[1] << " " << q[2]  << " " <<  q[3] << "\n";
+    cout << "pose after 1 sec  " << p[0] << " "  << p[1]  << " " << p[2] << "\n";
 
-    q_2 = robot.forward_kinematic_model(0.5, 0.5);
-
-    cout << q_2[0] << " " << q_2[1] << " " << q_2[2]  << " " <<  q_2[3] << endl;
+    p = robot.dead_reckoning(2, 0, 1);
+    cout << "pose after 1 sec  " << p[0] << " "  << p[1]  << " " << p[2] << "\n";
 
     /*int rand_numb = 2433;
     cout << "looks at line " << rand_numb + 9 << "\n";

@@ -3,7 +3,9 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
+
 #include "header/DataSet.hpp"
+#include "header/calibration_utility.hpp"
 
 
 
@@ -38,8 +40,8 @@ namespace data_management{
         
         data.time.push_back(extract_time(line));
         data.ticks.push_back(extract_ticks(line));
-        data.model_pose.push_back(extract_model_pose(line));
-        data.tracker_pose.push_back(extract_tracker_pose(line));
+        data.model_poses.push_back(extract_model_pose(line));
+        data.tracker_poses.push_back(extract_tracker_pose(line));
         data.len++;
         return;
     }
@@ -55,9 +57,9 @@ namespace data_management{
         return ticks;
     }
     
-    std::array<double, 3> DataSet::extract_model_pose(const std::string& line){
+    pose2d DataSet::extract_model_pose(const std::string& line){
         u_int8_t CHAR_MODEL_POSE_COUNT = 11; //number of char for "tracker_pose:"
-        std::array<double, 3> model_pose;
+        pose2d model_pose;
 
         size_t model_pos_position_in_line = line.rfind("model_pose:");
         std::string model_pose_substring = line.substr(model_pos_position_in_line + CHAR_MODEL_POSE_COUNT);
@@ -66,9 +68,9 @@ namespace data_management{
         return model_pose;
     }
 
-    std::array<double, 3>  DataSet::extract_tracker_pose(const std::string& line){
+    pose2d  DataSet::extract_tracker_pose(const std::string& line){
         u_int8_t CHAR_TRACKER_POSE_COUNT = 13;
-        std::array<double, 3> tracker_pose;
+        pose2d tracker_pose;
         size_t tracker_pos_position_in_line = line.rfind("tracker_pose:");
         std::string tracker_pose_substring = line.substr(tracker_pos_position_in_line + CHAR_TRACKER_POSE_COUNT);
         std::istringstream iss(tracker_pose_substring);

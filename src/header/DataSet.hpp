@@ -3,14 +3,15 @@
 #include <array>
 #include <string>
 
+#include "calibration_utility.hpp"
 
 namespace data_management{
 
 struct DataStruct{
     std::vector<long double> time; 
     std::vector<std::array<u_int32_t, 2>> ticks; // steering(absolute) driving(incremental)
-    std::vector< std::array<double, 3>> model_pose; // x y theta
-    std::vector<std::array<double, 3>> tracker_pose; // x_real, y_real, theta_real
+    trajectory model_poses; //   vector < array(x y theta) >
+    trajectory tracker_poses; // vector < array(x_real, y_real, theta_real) >
     int len=0;
 };
 
@@ -29,10 +30,11 @@ public:
 private:
     void process_line(const std::string& line);
     std::array<u_int32_t, 2> extract_ticks(const std::string& line);
-    std::array<double, 3> extract_model_pose(const std::string& line);
-    std::array<double, 3> extract_tracker_pose(const std::string& line);
+    pose2d extract_model_pose(const std::string& line);
+    pose2d extract_tracker_pose(const std::string& line);
     long double extract_time(const std::string& line);
     //std::string pack_sample(const std::vector<double>& sample);
 
 };//end DataSet class 
+
 };//end data_management namespace
