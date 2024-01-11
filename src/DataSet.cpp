@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "header/DataStruct.hpp"
+#include <iomanip>
 #include "header/DataSet.hpp"
 
 
@@ -35,14 +35,14 @@ namespace data_management{
     }
 
     void DataSet::process_line(const std::string& line){
-
+        
+        data.time.push_back(extract_time(line));
         data.ticks.push_back(extract_ticks(line));
         data.model_pose.push_back(extract_model_pose(line));
         data.tracker_pose.push_back(extract_tracker_pose(line));
         data.len++;
         return;
     }
-
     
     std::array<u_int32_t, 2> DataSet::extract_ticks(const std::string& line){
         std::array<u_int32_t, 2> ticks;
@@ -55,8 +55,6 @@ namespace data_management{
         return ticks;
     }
     
-    
-    
     std::array<double, 3> DataSet::extract_model_pose(const std::string& line){
         u_int8_t CHAR_MODEL_POSE_COUNT = 11; //number of char for "tracker_pose:"
         std::array<double, 3> model_pose;
@@ -68,7 +66,6 @@ namespace data_management{
         return model_pose;
     }
 
-
     std::array<double, 3>  DataSet::extract_tracker_pose(const std::string& line){
         u_int8_t CHAR_TRACKER_POSE_COUNT = 13;
         std::array<double, 3> tracker_pose;
@@ -79,5 +76,15 @@ namespace data_management{
         return tracker_pose;
     }
    
+    long double DataSet::extract_time(const std::string& line){
+       
+        u_int8_t CHAR_TIME = 5; //time: AKA 5 char
+        long double time_step;
+        std::string sub_string_time = line.substr(CHAR_TIME);
+        std::istringstream iss(sub_string_time);
+        iss >> time_step;
+        return time_step; 
+        }
+
     //std::string* DataSet::pack_sample(const std::vector<double>& sample){}
 }; //end data_management namespace

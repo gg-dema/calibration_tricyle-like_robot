@@ -12,7 +12,7 @@ for l in lines:
 	if(c < 10):
 		continue
 	tokens = l.split(":")
-	tracker_pose = tokens[-1].strip()
+	tracker_pose = tokens[-2].strip()
 	xy = tracker_pose.split(" ")
 	x.append(float(xy[0]))
 	y.append(float(xy[1]))
