@@ -37,4 +37,6 @@ private:
 
 };//end DataSet class 
 
+void write_trajectory(const std::string& destination_path, const trajectory& t, const std::vector<std::array<double, 2>> reconstructed_vel);
+
 };//end data_management namespace

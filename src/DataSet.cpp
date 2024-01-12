@@ -24,7 +24,6 @@ namespace data_management{
     }
 
     void DataSet::read_data(const std::string& source_path){   
-        
         std::ifstream file(source_path);
         std::string line; 
         if (file.is_open()){
@@ -37,7 +36,6 @@ namespace data_management{
     }
 
     void DataSet::process_line(const std::string& line){
-        
         data.time.push_back(extract_time(line));
         data.ticks.push_back(extract_ticks(line));
         data.model_poses.push_back(extract_model_pose(line));
@@ -89,4 +87,19 @@ namespace data_management{
         }
 
     //std::string* DataSet::pack_sample(const std::vector<double>& sample){}
+
+    // GENERIC FUNCT
+    void write_trajectory(const std::string& destination_path, const trajectory& t, const std::vector<std::array<double, 2>> reconstructed_vel){
+
+        std::ofstream outputFile(destination_path);
+        if (outputFile.is_open()){
+            outputFile << "x;y;theta;steering_v;driving_v\n";
+            for (int i=0; i<t.size(); i++ ){
+                outputFile << t[i][0] << "; " << t[i][1]  << "; " << t[i][2] << "; " << reconstructed_vel[i][0] << "; " << reconstructed_vel[i][1] << '\n';
+            }
+        }
+        outputFile.close();
+    }
+
+
 }; //end data_management namespace
