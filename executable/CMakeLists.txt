@@ -1,8 +1,8 @@
 # create data management lib
 add_library(calib_lib 
-                DataSet.cpp 
-                RobotModel.cpp
-                calibration_utility.cpp)
+                ../src/DataSet.cpp 
+                ../src/RobotModel.cpp
+                )
 
 # create new exec
 add_executable(main main.cpp)

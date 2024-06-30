@@ -18,8 +18,8 @@ int main(){
     double driving_v;
     double steering_v;
     double delta_t;
-    pose2d p;
-    trajectory odometry_trajectory;
+    cal_lib::pose2d p;
+    cal_lib::trajectory odometry_trajectory;
     for(int i=1; i<dataSet.data.len; i++){
 
         delta_t = dataSet.data.time[i] - dataSet.data.time[i-1];
@@ -27,7 +27,7 @@ int main(){
         steering_v = robot.reconstruct_steering_input(dataSet.data.ticks[i][0]);
         reconstructed_velocity.push_back({steering_v, driving_v});
         p = robot.dead_reckoning(steering_v, driving_v, delta_t);
-        cout << "steering " << steering_v << " driving "<< driving_v << " " << p <<'\n';
+        cout << p <<'\n';
         odometry_trajectory.push_back(p);
     }
     data_management::write_trajectory(destination_path, odometry_trajectory, reconstructed_velocity);

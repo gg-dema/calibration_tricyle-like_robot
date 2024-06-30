@@ -14,7 +14,7 @@ struct model_parameters{
 };
 
 struct sensor_parameters{
-    pose2d position;
+    cal_lib::pose2d position;
     // other params 
 };
 
@@ -23,20 +23,22 @@ class TractionDriveRobotModel{
     
 public: 
 
-    using state_vect = std::array<double, 4>;   // q = [x, y, theta, phi]
-    state_vect _q_state_vect; 
+    cal_lib::state_vector _q_state_vect; 
 
     TractionDriveRobotModel();
-    TractionDriveRobotModel(state_vect q);
+    TractionDriveRobotModel(cal_lib::state_vector q);
 
     double reconstruct_steering_input(int tick_angular_encoder);
     double reconstruct_driving_input(int tick_linear_encoder);
 
-    pose2d dead_reckoning(double steering_v, double driving_v, double delta_t);
-    state_vect forward_kinematic_model(double steering_v, double driving_v);
+    cal_lib::pose2d dead_reckoning(double steering_v, double driving_v, double delta_t);
+    
+    template<cal_lib::state_vector (*T) (cal_lib::state_vector, cal_lib::tick , model_parameters)>
+    cal_lib::state_vector forward_kinematic_model(cal_lib::state_vector q, cal_lib::tick i , model_parameters p);
 
-    friend void error_and_jacobian(TractionDriveRobotModel& robot, const pose2d& measurement); //---> still to define how return error, jac
+    friend void error_and_jacobian(TractionDriveRobotModel& robot, const cal_lib::pose2d& measurement); //---> still to define how return error, jac
     void perturb_model_parameter(model_parameters pertubation);
+
 
 protected:
     model_parameters _parameters;
@@ -46,9 +48,10 @@ protected:
     
 };
 
-TractionDriveRobotModel::state_vect operator+(const TractionDriveRobotModel::state_vect& q1, const TractionDriveRobotModel::state_vect& q2);
-TractionDriveRobotModel::state_vect operator*(const TractionDriveRobotModel::state_vect& q, const double& scalar);
-std::ostream& operator<<(std::ostream& os, const TractionDriveRobotModel::state_vect& p);
+// In theory now this function are manage by the Eigen library
+//TractionDriveRobotModel::state_vector operator+(const TractionDriveRobotModel::state_vect& q1, const TractionDriveRobotModel::state_vect& q2);
+//TractionDriveRobotModel::state_vector operator*(const TractionDriveRobotModel::state_vect& q, const double& scalar);
+//std::ostream& operator<<(std::ostream& os, const TractionDriveRobotModel::state_vect& p);
 
 
 }; //end RobotModel namespace

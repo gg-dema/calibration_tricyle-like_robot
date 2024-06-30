@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 def analyze_original_dataset(ground_t=False):
-    f = open("data/dataset.txt")
+    f = open("../data/dataset.txt")
 
     lines = f.read().splitlines()
 
