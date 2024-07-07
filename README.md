@@ -1,27 +1,7 @@
-# calibration_tricyle-like_robot
 # Calibration Tricycle-like Robot
 
 ## Overview
 
-This project focuses on the calibration of a tricycle-like robot, aiming to improve its accuracy and performance through precise adjustments and measurements. The calibration process involves various techniques and algorithms to fine-tune the robot's parameters for optimal operation.
+This project focuses on the calibration of a tricycle-like robot, aiming to improve its accuracy and performance through precise adjustments and measurements. The calibration process involves a least-square engine to fine-tune the robot's parameters. Given a false trajectory (obtained by the odometry), and a reference trajectory (obtained by external sensors), we could adjust the kinematic parameters for minimize the distance between this 2 trajectory
 
-## Features
-
-- **Automated Calibration**: Implement an automated system to calibrate the robot efficiently.
-- **Accuracy Improvement**: Techniques to enhance the robot's navigation and movement accuracy.
-- **Parameter Adjustment**: Tools to adjust and optimize the robot's operational parameters.
-- **Simulation Environment**: A simulation environment for testing calibration methods without the need for physical trials.
-
-## Getting Started
-
-### Prerequisites
-
-- ROS (Robot Operating System)
-- Python 3.6 or higher
-- CMake (Version 3.10 or higher)
-
-### Installation
-
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/calibration_tricycle-like_robot.git
+## For be part of the journey and read some post about this project, i'd like to share with you this [notion page](https://www.notion.so/Least-Square-Calibration-45e41b04b2284f6daa041cb857017fe2?pvs=4)
