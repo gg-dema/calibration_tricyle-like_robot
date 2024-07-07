@@ -1,7 +1,8 @@
 # create data management lib
 add_library(calib_lib 
-                ../src/DataSet.cpp 
-                ../src/RobotModel.cpp
+                ../src/dataset.cpp 
+                ../src/robot_model.cpp
+                ../src/robot_dynamics.cpp
                 )
 
 # create new exec
