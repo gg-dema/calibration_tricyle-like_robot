@@ -5,16 +5,18 @@
 #include <memory>
 #include <eigen3/Eigen/Core>
 
+#include <iostream>
+
 namespace RobotModel{ 
 
-// ABSOLUTE VALUE AS TICK
 double TractionDriveRobotModel::reconstruct_steering_input(int tick_angular_encoder){
     if (tick_angular_encoder > (double) this-> kMaxEncoderValSteering/2)
         tick_angular_encoder-=this-> kMaxEncoderValSteering;
     return this->parameters_.K_steer * 2 * M_PI * ((double) tick_angular_encoder/this->kMaxEncoderValSteering); 
 }
-// DELTA VALUE AS TICK
+
 double TractionDriveRobotModel::reconstruct_driving_input(int tick_linear_encoder){
+    
     return this->parameters_.K_traction * (tick_linear_encoder/this->kMaxEncoderValDriving); 
 }
 
@@ -30,9 +32,11 @@ TractionDriveRobotModel::TractionDriveRobotModel(StateVector q, model_parameters
 }
 
 
-cal_lib::Pose2d TractionDriveRobotModel::forward_step(cal_lib::Tick input, double delta_t){    
-    cal_lib::Pose2d pose;
-    return pose;
+cal_lib::Pose2d TractionDriveRobotModel::forward_step(std::vector<double> velocity, double delta_t){   
+
+    cal_lib::Pose2d pose_;
+    pose_ = (*dyn_)(q_state_vect_, velocity, delta_t);
+    return pose_;
 }
 
 

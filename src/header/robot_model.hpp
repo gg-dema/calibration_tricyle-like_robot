@@ -26,7 +26,7 @@ public:
     double reconstruct_steering_input(int tick_angular_encoder);
     double reconstruct_driving_input(int tick_linear_encoder);
     
-    cal_lib::Pose2d forward_step(const cal_lib::Tick input, double delta_t);
+    cal_lib::Pose2d forward_step(std::vector<double> velocity, double delta_t);
     void error_and_jacobian(TractionDriveRobotModel& robot, const cal_lib::Pose2d& measurement); //---> still to define how return error, jac
     void perturb_model_parameter(model_parameters pertubation);
 

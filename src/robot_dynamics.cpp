@@ -1,31 +1,46 @@
 #include "header/robot_model.hpp"
 #include "header/robot_dynamics.hpp"
 #include "eigen3/Eigen/Core"
+#include <iostream>
 
 using namespace cal_lib;
 
 namespace RobotModel{
     namespace Dynamics{
     
-    StateVector DynamicModel::euler_integration(const StateVector q, const StateVector q_dot, const float delta_time){
-                return q + q_dot*delta_time;
+    void DynamicModel::euler_integration(StateVector& q, StateVector q_dot, const float delta_time){
+                //std::cout << "euler: delta time" << delta_time << '\n';
+                //StateVector out = q + q_dot*delta_time;
+                //std::cout << out << '\n';
+                q += q_dot*delta_time;
             }
     
-    Pose2d GrisettiModel::forward(const StateVector q, const Tick input){
-        Pose2d pose;
-        pose[0] = q[0] + input[0]*cos(q[2]);
-        pose[1] = q[1] + input[0]*sin(q[2]);
-        pose[2] = q[2] + input[1];
-        return pose;
+    StateVector GrisettiModel::forward(const StateVector q, std::vector<double> input){
+        /* return the displacement done after some imput*/
+        StateVector out;
+        double phi = input[1];
+        double back_wheel_disp = input[0];
+
+        // AKA delta_theta --> angular displacement of the reference frame
+        out[2] = back_wheel_disp*(sin(phi)/params_->axis_lenght);
+        //steering
+        out[3] = 0;
+        //x
+        out[0] = input[0]*sin_taylor_expansion(out[2]);
+        //y
+        out[1] = input[0]*cos_taylor_expansion(out[2]);
+        return out;
     }
     
-    StateVector GrisettiModel::operator()(const StateVector q, std::vector<double> input){
-        StateVector q_dot;
-        q_dot[0] = input[0]*cos(q[2]);
-        q_dot[1] = input[0]*sin(q[2]);
-        q_dot[2] = input[0]*tan(q[2])/(params_->axis_lenght);
-        q_dot[3] = input[1];
-        return q_dot;
+    Pose2d GrisettiModel::operator()(StateVector& q, std::vector<double> velocity, double delta_t){
+
+        StateVector delta_pose = forward(q, velocity);
+        std::cout << "q: " << q << '\n';
+        euler_integration(q, delta_pose, delta_t); //problem: this do extra operation : integrate also the steering angle 
+        q[3] = velocity[1];
+        //std::cout << "q: " << q << '\n';
+        Pose2d pose = {q[0], q[1], q[2]};
+        return pose;
     }
 
     double GrisettiModel::sin_taylor_expansion(const double x){
@@ -37,21 +52,27 @@ namespace RobotModel{
 
     OrioloModel::OrioloModel(std::shared_ptr<model_parameters> params): DynamicModel(params){};
 
-    StateVector OrioloModel::operator()(const StateVector q, std::vector<double> input){
+    Pose2d OrioloModel::operator()(StateVector& q, std::vector<double> velocity, double delta_t){
                     
-                double v = input[0];
-                double omega = input[1];
-                double delta_t = input[3];
-                StateVector q_dot = forward_kin_model(q, v, omega);
-                return euler_integration(q, q_dot, delta_t);
+                //std::cout << "delta_t: " << delta_t << '\n';       
+                StateVector q_dot = forward_kin_model(q, velocity);
+                //std::cout << "q: " << q << '\n';
+                //std::cout << "q_dot: " << q_dot << '\n';
+
+                //update q state
+                euler_integration(q, q_dot, delta_t);
+                std::cout << "q: " << q << '\n';
+
+                Pose2d pose = {q[0], q[1], q[2]};
+                return pose;
             }
             
-    StateVector OrioloModel::forward_kin_model(const StateVector q, double v, double omega){
+    StateVector OrioloModel::forward_kin_model(const StateVector q, std::vector<double> input_v){
                 cal_lib::StateVector velocity;
-                velocity[0] = v*cos(q[2]);
-                velocity[1] = v*sin(q[2]);
-                velocity[2] = omega*tan(q[2])/(params_->axis_lenght);
-                velocity[3] = v;
+                velocity[0] = input_v[0]*cos(q[2]);
+                velocity[1] = input_v[0]*sin(q[2]);
+                velocity[2] = input_v[0]*tan(q[2])/(params_->axis_lenght);
+                velocity[3] = input_v[1];
                 return velocity;
             
             }

@@ -15,8 +15,8 @@ namespace Dynamics{
     class DynamicModel{
     public:
         DynamicModel(std::shared_ptr<model_parameters> params) : params_(params){}
-        virtual StateVector operator()(const StateVector q, std::vector<double> input)=0;
-        StateVector euler_integration(const StateVector q, const StateVector q_dot, const float delta_time);
+        virtual Pose2d operator()(StateVector& q, std::vector<double> velocity, double delta_t)=0;
+        void euler_integration(StateVector& q, StateVector q_dot, float delta_time);
         
     protected:
         std::shared_ptr<model_parameters> params_;
@@ -25,8 +25,8 @@ namespace Dynamics{
     class GrisettiModel : public DynamicModel {
     public:
         GrisettiModel(std::shared_ptr<model_parameters> params) : DynamicModel(params){}
-        StateVector operator()(const StateVector q, std::vector<double> input) override; 
-        Pose2d forward(const StateVector, const Tick);
+        Pose2d operator()(StateVector& q, std::vector<double> velocity, double delta_t) override; 
+        StateVector forward(const StateVector, std::vector<double> velocity);
         double sin_taylor_expansion(const double x);
         double cos_taylor_expansion(const double x);
     private:            
@@ -39,9 +39,8 @@ namespace Dynamics{
     
         public:
             OrioloModel(std::shared_ptr<model_parameters> params);
-            StateVector operator()(const StateVector q, std::vector<double> input) override; 
-            cal_lib::StateVector dead_reckording(const cal_lib::Pose2d, const cal_lib::Tick);
-            cal_lib::StateVector forward_kin_model(const cal_lib::StateVector, double v, double omega);
+            Pose2d operator()(StateVector& q, std::vector<double> velocity, double delta_t) override; 
+            cal_lib::StateVector forward_kin_model(const cal_lib::StateVector, std::vector<double> velocity);
     };
 
 } // end Dynamics namespace

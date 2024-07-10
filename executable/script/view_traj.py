@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def analyze_original_dataset(ground_t=False):
-    f = open("../data/dataset.txt")
+def analyze_original_dataset(path, ground_t=False):
+    f = open(path)
 
     lines = f.read().splitlines()
 
@@ -35,7 +35,7 @@ def analyze_original_dataset(ground_t=False):
     plt.show()
 
 
-def analyze_reconstructed_odometry(path="data/odometry_reconstructed.csv"):
+def analyze_reconstructed_odometry(path):
     data = pd.read_csv(path, sep=";", header=0)
     print(data.columns)
     fig, axs = plt.subplots(1, 3)
@@ -54,4 +54,5 @@ def analyze_reconstructed_odometry(path="data/odometry_reconstructed.csv"):
 
 if __name__ == "__main__":
     # analyze_original_dataset()
-    analyze_reconstructed_odometry()
+    path = '../../data/odometry_reconstructed.csv'
+    analyze_reconstructed_odometry(path)

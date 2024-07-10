@@ -18,11 +18,6 @@ namespace data_management{
         read_data(source_path);
     };
 
-    //funct  
-    void DataSet::write_data(const std::string& destination_path){ 
-        std::cout << "write data manager to: {we are faking} " << destination_path << std::endl;   
-    }
-
     void DataSet::read_data(const std::string& source_path){   
         std::ifstream file(source_path);
         std::string line; 
@@ -94,24 +89,25 @@ namespace data_management{
         cal_lib::tick_logs delta_ticks;
 
         // inizialize with first val of ticks
-        u_int32_t old_traction_abs = data_.ticks[0][0];
-        u_int32_t old_steering_incremental = data_.ticks[0][1];;
+        u_int64_t old_traction_abs = data_.ticks[0][0];
+        u_int64_t old_steering_incremental = data_.ticks[0][1];;
 
-        u_int32_t new_traction_abs;
-        u_int32_t new_steering_incremental;
+        u_int64_t new_traction_abs;
+        u_int64_t new_steering_incremental;
 
-        int32_t delta_steering_ticks;
-        int32_t delta_traction_ticks;
+        int64_t delta_steering_ticks;
+        int64_t delta_traction_ticks;
 
         for(int i=0; i<data_.len; i++){
-            new_traction_abs = data_.ticks[i][0];
-            new_steering_incremental = data_.ticks[i][1];
+            new_traction_abs = data_.ticks[i][0]; // steeroing is absolute, not traction
+            new_steering_incremental = data_.ticks[i][1]; // same for traction
             
             //normalize the absolute val
-            delta_traction_ticks = (int32_t) new_traction_abs - old_traction_abs;
-            if (delta_traction_ticks < -100000){
-                delta_traction_ticks = (UINT32_MAX - old_traction_abs) + new_traction_abs;
-            }
+            // problem: traction is incremental, not absolute
+            delta_traction_ticks = (int64_t) (new_traction_abs - old_traction_abs);
+            //if (delta_traction_ticks < -100000){
+            //   delta_traction_ticks = (UINT32_MAX - old_traction_abs) + new_traction_abs;
+            //}
 
 
             //normalize the steering val
@@ -143,5 +139,19 @@ namespace data_management{
         outputFile.close();
     }
   
+      
+    void DataSet::write_data(const std::string& destination_path){ 
+        std::ofstream file;
+        file.open(destination_path);
+        file << "steering, driving, delta_steering, delta_driving\n";
+        for(int i=0; i<data_.len; i++)
+        {
+            file << data_.ticks[i][0] <<";" <<data_.ticks[i][1] << ";"
+                << data_.delta_ticks[i][0] <<";" <<data_.delta_ticks[i][1] << '\n';
+        }
+        file.close();
+    }
+
+
 
 }; //end data_management namespace

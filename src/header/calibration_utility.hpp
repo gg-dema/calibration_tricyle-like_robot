@@ -10,7 +10,7 @@ namespace cal_lib{
     using Pose2d =  Eigen::Vector3d;
     typedef std::vector<Pose2d> trajectory;
     
-    using Tick = Eigen::Vector<u_int32_t, 2>;
+    using Tick = Eigen::Vector<u_int64_t, 2>;
     typedef std::vector<Tick> tick_logs;
 
     using StateVector = Eigen::Vector4d;
