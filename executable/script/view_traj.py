@@ -19,9 +19,7 @@ def analyze_original_dataset(path, ground_t=False):
         if ground_t:
             tracker_pose = tokens[-1].strip()  # sensor trajectory
         else:
-            tracker_pose = tokens[
-                -2
-            ].strip()  # the trajectory generated with the wrong parameters
+            tracker_pose = tokens[-2].strip()  # the trajectory generated with the wrong parameters
         xy = tracker_pose.split(" ")
         x.append(float(xy[0]))
         y.append(float(xy[1]))
@@ -53,6 +51,6 @@ def analyze_reconstructed_odometry(path):
 
 
 if __name__ == "__main__":
-    # analyze_original_dataset()
     path = '../../data/odometry_reconstructed.csv'
     analyze_reconstructed_odometry(path)
+    analyze_original_dataset(path='../../data/dataset.txt')

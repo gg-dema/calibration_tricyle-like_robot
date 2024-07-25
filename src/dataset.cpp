@@ -21,13 +21,15 @@ namespace data_management{
     void DataSet::read_data(const std::string& source_path){   
         std::ifstream file(source_path);
         std::string line; 
-        if (file.is_open()){
-            while(std::getline(file, line)){
+        if (file.is_open())
+        {
+            while(std::getline(file, line))
+            {
                 if(line[0]!='#'){process_line(line);}
             }
         file.close();
+        convert_32bit_ticks_to_64bit();
         }
-
     }
 
     void DataSet::process_line(const std::string& line){
@@ -47,7 +49,9 @@ namespace data_management{
         size_t ticks_position_in_line = line.rfind("ticks:");
         std::string ticks_substring = line.substr(ticks_position_in_line + CHAR_MODEL_POSE_COUNT);
         std::istringstream iss(ticks_substring);
-        iss >> t[0] >> t[1];
+
+        iss >> t[cal_lib::STEERING] >> t[cal_lib::TRACTION];
+
         return t;
     }
     
@@ -84,50 +88,41 @@ namespace data_management{
         return time_step; 
         }
 
-    void DataSet::convert_ticks_to_incremental_ticks(){
-        
-        cal_lib::tick_logs delta_ticks;
-
+    void DataSet::convert_32bit_ticks_to_64bit(){
+    
         // inizialize with first val of ticks
-        u_int64_t old_traction_abs = data_.ticks[0][0];
-        u_int64_t old_steering_incremental = data_.ticks[0][1];;
-
-        u_int64_t new_traction_abs;
-        u_int64_t new_steering_incremental;
-
-        int64_t delta_steering_ticks;
+        u_int64_t traction_incremental_to_store = data_.ticks[0][cal_lib::TRACTION];
+        u_int64_t old_traction_incremental = data_.ticks[0][cal_lib::TRACTION];
+        u_int64_t new_traction_incremental;
         int64_t delta_traction_ticks;
 
-        for(int i=0; i<data_.len; i++){
-            new_traction_abs = data_.ticks[i][0]; // steeroing is absolute, not traction
-            new_steering_incremental = data_.ticks[i][1]; // same for traction
-            
-            //normalize the absolute val
-            // problem: traction is incremental, not absolute
-            delta_traction_ticks = (int64_t) (new_traction_abs - old_traction_abs);
-            //if (delta_traction_ticks < -100000){
-            //   delta_traction_ticks = (UINT32_MAX - old_traction_abs) + new_traction_abs;
-            //}
 
+        for(int i=1; i<data_.len; i++)
+        {
+            new_traction_incremental =  data_.ticks[i][cal_lib::TRACTION];
 
-            //normalize the steering val
-            //maybe it's not needed
-
-            data_.delta_ticks.push_back({delta_steering_ticks, delta_traction_ticks});
-
-            //updat old_val
-            old_traction_abs = new_traction_abs;
-            old_steering_incremental = new_steering_incremental;
+            // calc delta (and manage overflow) 
+            delta_traction_ticks = (int64_t) (new_traction_incremental - old_traction_incremental);
+            if (delta_traction_ticks < -100000)
+            {
+               delta_traction_ticks = (UINT32_MAX - old_traction_incremental) + new_traction_incremental;
+            }
+            // store old ticks + new delta
+            traction_incremental_to_store += delta_traction_ticks;
+            data_.ticks[i][cal_lib::TRACTION] = traction_incremental_to_store;
+     
+            old_traction_incremental = new_traction_incremental;
         }
 
     }
+    
     //std::string* DataSet::pack_sample(const std::vector<double>& sample){}
 
     // GENERIC FUNCT
     void write_trajectory(
         const std::string& destination_path,
         const cal_lib::trajectory& t, 
-        const std::vector<std::array<double, 2>> reconstructed_vel){
+        const std::vector<std::array<long double, 2>> reconstructed_vel){
 
         std::ofstream outputFile(destination_path);
         if (outputFile.is_open()){
@@ -146,8 +141,7 @@ namespace data_management{
         file << "steering, driving, delta_steering, delta_driving\n";
         for(int i=0; i<data_.len; i++)
         {
-            file << data_.ticks[i][0] <<";" <<data_.ticks[i][1] << ";"
-                << data_.delta_ticks[i][0] <<";" <<data_.delta_ticks[i][1] << '\n';
+            file << data_.ticks[i][0] <<";" <<data_.ticks[i][1] << ";\n";
         }
         file.close();
     }

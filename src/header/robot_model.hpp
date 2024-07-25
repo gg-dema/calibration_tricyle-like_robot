@@ -23,10 +23,14 @@ public:
 
     TractionDriveRobotModel(StateVector q, model_parameters &params, Dynamics::DynamicModel &model);
     
-    double reconstruct_steering_input(int tick_angular_encoder);
-    double reconstruct_driving_input(int tick_linear_encoder);
+    long double reconstruct_steering_input(int64_t tick_abs_encoder);
+    long double reconstruct_traction_input(int64_t tick_incremental_encoder);
     
-    cal_lib::Pose2d forward_step(std::vector<double> velocity, double delta_t);
+
+    //double reconstruct_steering_input(int tick_abs_encoder);
+    //double reconstruct_traction_input(int tick_incremental_encoder);
+    
+    cal_lib::Pose2d forward_step(std::vector<long double> velocity, double delta_t);
     void error_and_jacobian(TractionDriveRobotModel& robot, const cal_lib::Pose2d& measurement); //---> still to define how return error, jac
     void perturb_model_parameter(model_parameters pertubation);
 
@@ -36,8 +40,8 @@ protected:
     Dynamics::DynamicModel* dyn_;
     model_parameters parameters_;
     sensor_parameters sensor_;
-    static constexpr int kMaxEncoderValSteering = 8192;
-    static constexpr int kMaxEncoderValDriving = 5000;
+    static const u_int64_t kMaxEncoderValSteering = 8192;
+    static const u_int64_t kMaxEncoderValDriving = 5000;
     
 };
 

@@ -10,7 +10,6 @@ namespace data_management{
 struct DataStruct{
     std::vector<long double> time; 
     cal_lib::tick_logs ticks;              // steering(absolute) driving(incremental)
-    cal_lib::tick_logs delta_ticks;        // steering, driving
     cal_lib::trajectory model_poses;       // vector < (eigenVector3d)array(x y theta) >
     cal_lib::trajectory tracker_poses;           
     int len=0;
@@ -29,7 +28,7 @@ public:
 
     void read_data(const std::string& source_path);
     void write_data(const std::string& destination_path);
-    void convert_ticks_to_incremental_ticks();
+    void convert_32bit_ticks_to_64bit();
 
 
 private:
@@ -44,6 +43,6 @@ private:
 
 };//end DataSet class 
 
-void write_trajectory(const std::string& destination_path, const cal_lib::trajectory& t, const std::vector<std::array<double, 2>> reconstructed_vel);
+void write_trajectory(const std::string& destination_path, const cal_lib::trajectory& t, const std::vector<std::array<long double, 2>> reconstructed_vel);
 
 };//end data_management namespace

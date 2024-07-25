@@ -7,17 +7,21 @@
 
 #include <iostream>
 
+
 namespace RobotModel{ 
 
-double TractionDriveRobotModel::reconstruct_steering_input(int tick_angular_encoder){
-    if (tick_angular_encoder > (double) this-> kMaxEncoderValSteering/2)
-        tick_angular_encoder-=this-> kMaxEncoderValSteering;
-    return this->parameters_.K_steer * 2 * M_PI * ((double) tick_angular_encoder/this->kMaxEncoderValSteering); 
+long double TractionDriveRobotModel::reconstruct_steering_input(int64_t tick_absolute_encoder){
+    
+    long double displacement = static_cast<long double>(tick_absolute_encoder) / static_cast<long double>(this->kMaxEncoderValSteering);
+    long double steering_input = this->parameters_.K_steer * 2.0 * 3.14 * (displacement); 
+
+    return steering_input;
 }
 
-double TractionDriveRobotModel::reconstruct_driving_input(int tick_linear_encoder){
+long double TractionDriveRobotModel::reconstruct_traction_input(int64_t tick_incremental_encoder){
     
-    return this->parameters_.K_traction * (tick_linear_encoder/this->kMaxEncoderValDriving); 
+    long double displacement = static_cast<long double>(tick_incremental_encoder) / static_cast<long double>(this->kMaxEncoderValDriving);
+    return (this->parameters_.K_traction * displacement); 
 }
 
 //void TractionDriveRobotModel::perturb_model_parameter(model_parameters pertubation){}
@@ -32,7 +36,7 @@ TractionDriveRobotModel::TractionDriveRobotModel(StateVector q, model_parameters
 }
 
 
-cal_lib::Pose2d TractionDriveRobotModel::forward_step(std::vector<double> velocity, double delta_t){   
+cal_lib::Pose2d TractionDriveRobotModel::forward_step(std::vector<long double> velocity, double delta_t){   
 
     cal_lib::Pose2d pose_;
     pose_ = (*dyn_)(q_state_vect_, velocity, delta_t);
@@ -42,7 +46,7 @@ cal_lib::Pose2d TractionDriveRobotModel::forward_step(std::vector<double> veloci
 
 void error_and_jacobian(TractionDriveRobotModel& robot, const cal_lib::Pose2d& measurement){
 
-    //error : h(q, X) - measurement 
+    // error : h(q, X) - measurement 
     // measurement: position of the sensor in world frame
     // h(q, X) with q = state vect, X = robot params
     // h(q, X) = [x, y, theta] = [ x + cos(theta)*sensor_params.x, ...] 
