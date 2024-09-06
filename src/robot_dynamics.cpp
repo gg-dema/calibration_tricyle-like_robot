@@ -16,7 +16,7 @@ namespace RobotModel{
 
         StateVector delta_pose = forward(q, velocity);
         euler_integration(q, delta_pose, delta_t); //problem: this do extra operation : integrate also the steering angle 
-        q[3] = velocity[0];
+        q[3] = velocity[STEERING];
         Pose2d pose = {q[0], q[1], q[2]};
         return pose;
     } 
@@ -25,8 +25,8 @@ namespace RobotModel{
     StateVector GrisettiModel::forward(const StateVector q, std::vector<long double> input){
         /* return the displacement done after some imput*/
         StateVector out;
-        long double phi = input[0];
-        long double delta_traction = input[1];
+        long double phi = input[STEERING];
+        long double delta_traction = input[TRACTION];
 
         // AKA delta_theta --> angular displacement of the reference frame
         out[2] = delta_traction*(sin(phi)/params_->axis_lenght);
@@ -69,10 +69,17 @@ namespace RobotModel{
             
     StateVector OrioloModel::forward_kin_model(const StateVector q, std::vector<long double> input_v){
                 cal_lib::StateVector velocity;
-                velocity[0] = input_v[0]*cos(q[2]);
-                velocity[1] = input_v[0]*sin(q[2]);
-                velocity[2] = input_v[0]*tan(q[2]) / (params_->axis_lenght);
-                velocity[3] = input_v[1];
+                
+                velocity[0] = input_v[TRACTION]*cos(q[2]);
+                velocity[1] = input_v[TRACTION]*sin(q[2]);
+                velocity[2] = input_v[TRACTION]*tan(q[2]) / (params_->axis_lenght);
+                velocity[3] = input_v[STEERING];
+                
+                // this version, althoug is incorrect, report better results, still looking for bug
+                //velocity[0] = input_v[STEERING]*cos(q[2]);
+                //velocity[1] = input_v[STEERING]*sin(q[2]);
+                //velocity[2] = input_v[STEERING]*tan(q[2]) / (params_->axis_lenght);
+                //velocity[3] = input_v[TRACTION];
                 return velocity;
             
             }
