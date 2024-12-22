@@ -29,7 +29,7 @@ void saveVectorToCSV(const std::vector<VectorType>& vec, const std::string& file
     file << header << "\n";
 
     for (size_t i = 0; i < vec.size(); ++i) {
-        file << vec[i][0] << ";" << vec[i][1];
+        file << vec[i][0] << ";" << vec[i][1] ;
         if (i != vec.size() - 1) {
             file << "\n"; // Newline after each element except the last
         }
@@ -52,6 +52,11 @@ int main() {
 
     // pre-process ticks for overflow
     data.delta_tick_extraction();
+    
+    //saveVectorToCSV(data.ground_truth, "../data/gt.csv", "x;y;t");
+    data.concat_ground_truth();
+    
+
 
     // log
     saveVectorToCSV(data.process_ticks, "../data/tmp.csv", "steering;driving");
@@ -102,27 +107,26 @@ int main() {
     // generate trajectory from the data with initial parameters
     poseTrajectory traj = robot.rollout_trajectory(data.process_ticks);
     
-    saveVectorToCSV(traj, "../data/trajectory.csv", "x;y");
+    //saveVectorToCSV(traj, "../data/trajectory.csv", "x;y");
 
 
 
     // calibrate
     CalibrationEngine engine(std::make_shared<Robot>(robot));
-    int num_iterations = 2;
+    int num_iterations = 100;
     
     for(int iteration=0; iteration<num_iterations; iteration++){
         engine.OneIteration(data);
 
-        std::ofstream file("error.csv", std::ios::app); // Open in append mode
-        if (file.is_open()) {
-            file << "iter: " << iteration << "\n";
-        file.close(); // Close the file after writing
-        } else {
-            std::cerr << "Unable to open file for writing." << std::endl;
-        }
+
     }
     
+    traj = robot.rollout_trajectory(data.process_ticks);
     
+    saveVectorToCSV(traj, "../data/calib_traj.csv", "x;y");
+
+
+
     return 0;
 }
 

@@ -7,9 +7,22 @@
 
 //@ TODO : to remove
 #include <iostream>
+#include <unistd.h>  // just for sleep in debug
 #include <fstream>
 
 
+
+void append_to_file(pose2d p){
+
+    std::ofstream file("log.csv", std::ios::app); // Open in append mode
+    if (file.is_open()) {
+        file << p.transpose() << "\n";
+        file.close(); // Close the file after writi
+    } else {
+        std::cerr << "Unable to open file for writing." << std::endl;
+    }
+
+}
 
 
 struct Statistics{
@@ -44,8 +57,9 @@ class CalibrationEngine{
         // ! this one is to fix: the state of the robot must be:
         // ! 1) resetted
         // ! 2) not modify
-        pose2d displacement = robot_->predict_displacement(encoder_measure);
-        robot_->integrate_displacement(displacement);
+        //pose2d displacement = robot_->predict_displacement(encoder_measure);
+        //robot_->integrate_displacement(displacement);
+
         pose2d world_X_robot = robot_->get_pose();
 
         // prediction: world_X_robot * robot_X_sensor = world_X_sensor
@@ -60,6 +74,7 @@ class CalibrationEngine{
             // update error:
         _error = t2v(world_X_sensor_obs.inverse() * world_X_sensor_zHat);
 
+        /*
         std::ofstream file("error.csv", std::ios::app); // Open in append mode
             if (file.is_open()) {
                 file << _error.transpose() << "\n";
@@ -67,12 +82,12 @@ class CalibrationEngine{
             } else {
                 std::cerr << "Unable to open file for writing." << std::endl;
             }
-
+        */
             // update jacobian
         update_jacobian(world_X_sensor_obs, robot_X_sensor, encoder_measure); 
-        
+        //std::cout << _jac << std::endl;
+        //std::cout << std::endl;
 
-    
     }
 
     void update_jacobian(
@@ -171,52 +186,79 @@ class CalibrationEngine{
         _b.setZero();
 
         robot_->pose_.setZero();
-        for(int i=0; i<data.length-1; i++) // iterate over the dataset
+         
+        // iterate over the dataset
+        for(int i=0; i<data.length-1; i++)
         { 
-            //if (data.delta_time[i] > 0.04)
-            //{
-            //if (i == 3){
-            //    exit(0);
-            //}
-                //std::cout << "pose" << robot_->pose_ << std::endl;
-                OneRound(data.process_ticks[i], data.ground_truth[i]);
-                _H += _jac.transpose()*_jac;
-                _b += _jac.transpose()*_error;
+
+            // update the jacobian and the error 
+            OneRound(data.process_ticks[i], data.ground_truth[i]);
                 
-                _jac.setZero();
-                _error.setZero();
-            //}
-            //else{
-            //    _statistics.skipped_data++;
-            //}
+            // check if error is superior tot the threshold
+            double chi = _error.transpose()*_error;
+            if (chi > 1){
+                _error *= sqrt(1/chi);
+            }
+            //sleep(5);
+
+            // modulation matrix omega:
+            Eigen::Matrix3d omega = Eigen::Matrix3d::Identity()*17;
+            omega(1, 1) *= 0.3;
+
+            //  update the H and the b vector
+            _H += _jac.transpose()* omega * _jac;
+            _b += _jac.transpose()* omega * _error;
+        
+            _jac.setZero();
+            _error.setZero();
+            
+
 
         }
-        std::cout << _b << std::endl;
-        std::cout << std::endl;
+
+        // dump the H matrix:
+        _H += Eigen::Matrix<double, 7, 7>::Identity();
+
+        //std::cout <<  std::endl << "b " << _b << std::endl;
+        //std::cout << std::endl;
         Eigen::Matrix<double, 7, 1> dx = solver();
+
+        // apply the boxplus operator
+        perturb_parameters(dx);
         std::cout << "dx" << dx << std::endl;
+
+        std::cout << "robot params kin: " << robot_->kinematicParams_->info() << std::endl;
+        std::cout << "robot params enc: " << robot_->encoderParams_->info() << std::endl;
+        std::cout << "robot params sensor: " << robot_->sensorParams_->info() << std::endl;
+
+        
     }
 
 
     private: 
 
 
-    void perturb_parameters(){
+    void perturb_parameters(Eigen::Matrix<double, 7, 1> perturbation){
         
         // this should modify the parameters registerd in the robot class
 
         // apply kin params 
-        robot_->kinematicParams_->axis_lenght += _perturbation[0];
-        robot_->kinematicParams_->steer_offset += _perturbation[1];
+        robot_->kinematicParams_->axis_lenght += perturbation[2];
+        robot_->kinematicParams_->steer_offset += perturbation[3];
         
         // perturn encoder k factor
-        robot_->encoderParams_->K_steering += _perturbation[2];
-        robot_->encoderParams_->K_driving += _perturbation[3];
+        robot_->encoderParams_->K_steering += perturbation[0];
+        robot_->encoderParams_->K_driving += perturbation[1];
 
-        // perturb sensor pose
-        robot_->sensorParams_->x += _perturbation[4];
-        robot_->sensorParams_->y += _perturbation[5];
-        robot_->sensorParams_->theta += _perturbation[6];
+        // perturb sensor pose --> transform and apply perturbation in manifold
+        //std::cout << perturbation << std::endl;
+        //std::cout << std::endl;
+        //std::cout << perturbation.tail(3) << std::endl;
+
+        pose2d params_sensors = t2v(v2t(perturbation.tail(3))*v2t(robot_->sensorParams_->as_pose()));
+        robot_->sensorParams_->x += params_sensors[0];
+        robot_->sensorParams_->y += params_sensors[1];
+        robot_->sensorParams_->theta += params_sensors[2];
 
     }
 

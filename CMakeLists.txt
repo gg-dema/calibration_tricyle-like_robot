@@ -19,4 +19,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/src/header)
 link_directories(${PROJECT_SOURCE_DIR}/lib)
 
+include(CTest)
+
 add_subdirectory(src)
+add_subdirectory(external) # contains google test

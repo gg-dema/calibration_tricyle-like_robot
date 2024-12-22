@@ -7,6 +7,9 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unistd.h>  // just for sleep in debug
+
+#include <eigen3/Eigen/Dense>
 
 
 
@@ -28,7 +31,7 @@ void saveVectorToCSV(const std::vector<VectorType>& vec, const std::string& file
     file << header << "\n";
 
     for (size_t i = 0; i < vec.size(); ++i) {
-        file << vec[i][0] << ";" << vec[i][1] << ";" << vec[i][2];
+        file << vec[i][0] << ";" << vec[i][1] << ";"<<  vec[i][2] << ";";
         if (i != vec.size() - 1) {
             file << "\n"; // Newline after each element except the last
         }
@@ -45,15 +48,24 @@ int main(){
  // Load the data from the file
     std::string file_path = "../data/dataset.txt";
     DataObject data = DataLoader::load(file_path);
-
-    // pre-process ticks for overflow
     data.delta_tick_extraction();
 
+    // check the delta ground truth
+    poseTrajectory delta_gt;
+    pose2d last_pose(0.0, 0.0, 0.0);
 
-    saveVectorToCSV(data.ground_truth, "../data/wrong.csv", "x;y;theta");
+    data.concat_ground_truth();
+
+    //for(int i=0; i < data.length-1; i++){
+    //    delta_gt.push_back(
+    //        t2v( v2t(last_pose).inverse() * v2t(data.ground_truth[i]))
+    //        );
+    //        last_pose = data.ground_truth[i];
+    //}
+
+    // save the delta ground truth
+    saveVectorToCSV(data.ground_truth, "../data/delta_gt.csv", "x;y;theta");
 
 
-
-
-    return 0;
 }
+

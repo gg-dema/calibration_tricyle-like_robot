@@ -67,6 +67,9 @@ struct SensorParameters{
                "robot 2 sensor y: " + std::to_string(y) + " " +
                "robot 2 sensor theta: " + std::to_string(theta) + "\n";
     }
+    pose2d as_pose(){
+        return pose2d(x, y, theta);
+    }
 };
 
 /* TODO:  move this function to a class "perturber", 

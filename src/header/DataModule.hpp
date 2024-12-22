@@ -29,6 +29,7 @@ public:
 
     void delta_tick_extraction();
     void delta_time_extraction();
+    void concat_ground_truth(); 
     
 private:
     DataObject()=default;

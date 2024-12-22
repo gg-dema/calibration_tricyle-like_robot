@@ -1,7 +1,9 @@
 // DataModule.cpp
 #include "header/DataModule.hpp"
+#include "eigen3/Eigen/Dense"
 
-#include <unistd.h>  // just for sleep
+//@TODO: remove this lib 
+#include <unistd.h>  // just for sleep in debug
 
 u_int8_t DataLoader::CHAR_TIME = 5;
 u_int8_t DataLoader::CHAR_TICK = 6;
@@ -14,6 +16,7 @@ int64_t MAX_INT_32 = 4294967295;
 // -------------------------------------------------------------------
 
 DataObject DataLoader::load(const std::string& file_path){
+    
     DataObject dataset;
     std::ifstream file(file_path);
     std::string line;
@@ -69,6 +72,7 @@ tick64 DataLoader::extract_tick(const std::string& line){
 
     return t;
 }
+
 pose2d DataLoader::extract_ground_truth_pose(const std::string& line){
     pose2d p;
     size_t tracker_pos_position_in_line = line.rfind("tracker_pose:");
@@ -109,7 +113,9 @@ void DataObject::delta_tick_extraction(){
     // here we consider only the uint32_t overflow --> the max resolution problem is manage in the encoder classes
 
     int64_t last_driving_readed_tick = ticks[0][DRIVING];
-    int64_t last_steering_readed_tick = ticks[0][STEERING]; 
+
+    // not used, but potentially useful in case steering will be a incremental encoder (who knows)
+    // int64_t last_steering_readed_tick = ticks[0][STEERING]; 
     
     // pre-allocate the memory for the process ticks
     process_ticks.resize(this->length);
@@ -135,42 +141,33 @@ void DataObject::delta_tick_extraction(){
         last_driving_readed_tick = ticks[i][DRIVING];
 
     }
-    
-    /* for(int i=0; i < this->length-1; i++){
+    std::cout << "delta tick extraction done" << std::endl;
 
-        // HEY, NON HAI BISOGNO DEI DELTA TICK PER LA TRACTION ---> USA I NORMALI
-        // the steering part should not have overflow (at least, in my data)
-        delta = static_cast<int64_t>(ticks[i+1][STEERING] - ticks[i][STEERING]);
-        delta_tick[STEERING] = delta;
+    // better delete data from pure "ticks" --> just check that im not calling the ticks anymore
+    // @ TODO: override ticks variable with process_ticks --> more clear
 
-        // driving part
-        int64_t current = static_cast<int64_t>(ticks[i][DRIVING]);
-        int64_t next = static_cast<int64_t>(ticks[i + 1][DRIVING]);
-
-        // Calculate the delta considering overflow
-        if (next < current && (current - next) > (UINT32_MAX / 2)) {
-            // Overflow occurred
-            delta = static_cast<int64_t>(next + (UINT32_MAX - current) + 1);
-        } else if (next > current && (next - current) > (UINT32_MAX / 2)) {
-            // Underflow occurred
-            delta = static_cast<int64_t>(next - (UINT32_MAX + current) - 1);
-        } else {
-            // Normal case
-            delta = next - current;
-        }
-        this->ticks[i][DRIVING] = delta;
-        //delta_tick[DRIVING] = delta;
-
-        // store the delta
-        //delta_ticks.push_back(delta_tick);
-    }
-
-    */
+    ticks.clear();
 }
 
 
 void DataObject::delta_time_extraction(){
+
     for(int i=1; i<length-1; i++){
         delta_time.push_back(time[i] - time[i-1]);
     }
+}
+
+
+void DataObject::concat_ground_truth(){
+
+    pose2d last_pose(0.0, 0.0, 0.0);
+    poseTrajectory concat_ground_truth;
+    for(int i=0; i < length-1; i++){
+        concat_ground_truth.push_back(
+            t2v(v2t(last_pose).inverse() * v2t(ground_truth[i]))
+        );
+        last_pose = ground_truth[i]; 
+    }
+    ground_truth = concat_ground_truth;
+
 }
