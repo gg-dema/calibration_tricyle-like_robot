@@ -1,5 +1,5 @@
 #include "header/robotModels.hpp"
-
+#include "header/utility.hpp"
 
 // CONST OF ENCODER
 //--------------------------
@@ -11,20 +11,18 @@ int IncrementalEncoder::MAX_DRIVING_ENCODER_TICK = 5000;
 // DECODING OF THE ENCODER TICK
 //-----------------------------
 // ABSOLUTE ENCODER
-double AbsoluteEncoder::tick_to_input(int64_t delta_tick, double K_factor){
+double AbsoluteEncoder::tick_to_input(int64_t tick, double K_factor){
     
     double_t normalized_tick;
 
     // center the data around 0
     // ?info?:  the static cast is due the fact thet otherwise we get integer in output
-
-    if (delta_tick >  MAX_STEERING_ENCODER_TICK/2){
-
-        normalized_tick = delta_tick - MAX_STEERING_ENCODER_TICK;
+    if (tick >  MAX_STEERING_ENCODER_TICK/2){
+        normalized_tick = tick - MAX_STEERING_ENCODER_TICK;
         normalized_tick /= static_cast<double>(MAX_STEERING_ENCODER_TICK);
     }
     else {
-        normalized_tick = static_cast<double>(delta_tick) / MAX_STEERING_ENCODER_TICK;
+        normalized_tick = static_cast<double>(tick) / MAX_STEERING_ENCODER_TICK;
     }
     // ?info? the steering offset is a kinematic parameters, added into the robot class directly
     return (2*M_PI*K_factor*normalized_tick); 
@@ -61,12 +59,9 @@ pose2d Robot::predict_displacement(
     // add the offset in the steering encoder:
     steer_input += steer_offset;
     
-    // kin model
-    double tmp1 = sin(steer_input);
-    double tmp2 = cos(steer_input);
-
-    double rho = driving_input * tmp2;
-    double delta_theta = driving_input * (tmp1/axis_length);
+    // kin models
+    double rho = driving_input * cos(steer_input);
+    double delta_theta = driving_input * (sin(steer_input)/axis_length);
 
     // sin/cos expansion 
     double sin_expansion = sin_taylor_expansion(delta_theta);
@@ -112,9 +107,9 @@ void Robot::integrate_displacement(const pose2d& displacement){
 
 
 poseTrajectory Robot::rollout_trajectory(
-    const std::vector<tick64>& encoders_measures){
+    const std::vector<tick64>& encoders_measures
+    ){
 
-    
     pose2d last_pose(0,0,0);
     poseTrajectory trajectory; 
 
@@ -134,7 +129,7 @@ poseTrajectory Robot::rollout_trajectory(
 
 poseTrajectory Robot::rollout_trajectory_sensor(
     const std::vector<tick64>&encoders_measures
-){
+    ){
     poseTrajectory sensor_trajectory;
     Eigen::Matrix3d robot_X_sensor = v2t(sensor_pose_);
     pose2d current_sensor_pose = pose2d(0., 0., 0.);

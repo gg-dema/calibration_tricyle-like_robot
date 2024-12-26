@@ -1,16 +1,22 @@
-// DataModule.cpp
+/**
+ * @file DataModule.cpp
+ * @brief Implementation of the DataModule.hpp file, see that for more details
+ * @author Gabriele G. Di Marzo [github : gg-dema]
+ */
+
 #include "header/DataModule.hpp"
 #include "eigen3/Eigen/Dense"
 
-//@TODO: remove this lib 
-#include <unistd.h>  // just for sleep in debug
 
+// Some util constant for the DataLoader class
 u_int8_t DataLoader::CHAR_TIME = 5;
 u_int8_t DataLoader::CHAR_TICK = 6;
 u_int8_t DataLoader::CHAR_MODEL_POSE = 11;
 u_int8_t DataLoader::CHAR_TRACKER_POSE = 13;
 
+// Max int 32 for account the encoder overflow;
 int64_t MAX_INT_32 = 4294967295;
+
 // -------------------------------------------------------------------
 // DataLoader methods
 // -------------------------------------------------------------------
@@ -39,37 +45,26 @@ DataObject DataLoader::load(const std::string& file_path){
 
 void DataLoader::process_line(const std::string& line, DataObject& dataset){
     dataset.time.push_back(extract_time(line));
-    dataset.ticks.push_back(extract_tick(line));
+    dataset.ticks.push_back(extract_ticks(line));
     dataset.recorder_trajectory.push_back(extract_recorder_pose(line));
     dataset.ground_truth.push_back(extract_ground_truth_pose(line));
     dataset.length++;
 }
 
 double DataLoader::extract_time(const std::string& line){
-    // std::cout << line << std::endl;
     long double time;
     std::string sub_string_time = line.substr(DataLoader::CHAR_TIME);
     std::istringstream iss(sub_string_time);
-    iss >> time;
-    
-    //std::cout << " time string: " <<  sub_string_time << std::endl;
-    //std::cout << "time: " << time << std::endl;
-    
+    iss >> time;  
     return time;
 }
 
-tick64 DataLoader::extract_tick(const std::string& line){
+tick64 DataLoader::extract_ticks(const std::string& line){
     tick64 t;
     size_t ticks_position_in_line = line.rfind("ticks:");
     std::string ticks_substring = line.substr(ticks_position_in_line + CHAR_TICK);
     std::istringstream iss(ticks_substring);
     iss >> t[STEERING] >> t[DRIVING];
-
-    // std::cout << std::endl;
-    // std::cout << "extract line tick: \n" << line << std::endl;
-    // std::cout << "tick substring: " << ticks_substring << '\n' <<
-    //             "extracted " << t[STEERING]  << "  " << t[DRIVING] << std::endl;
-
     return t;
 }
 
@@ -79,12 +74,6 @@ pose2d DataLoader::extract_ground_truth_pose(const std::string& line){
     std::string tracker_pose_substring = line.substr(tracker_pos_position_in_line + DataLoader::CHAR_TRACKER_POSE);
     std::istringstream iss(tracker_pose_substring);
     iss >> p[0] >> p[1] >> p[2];
-    
-    // std::cout << tracker_pos_position_in_line << std::endl;
-    // std::cout << "gt pose line: " << line << '\n' << 
-    // "gt pose substring:  " << tracker_pose_substring << 
-    // '\n' << "gt saved: " << p << std::endl;
-    
     return p;
 }
 
@@ -96,10 +85,6 @@ pose2d DataLoader::extract_recorder_pose(const std::string& line){
     std::istringstream iss(pose_substring);
     iss >> p[0] >> p[1] >> p[2];
     
-    // std::cout << "model pose line: " << line << '\n' << 
-    // "model pose substring:  " << pose_substring << std::endl;
-    // std::cout << "model pose: " << p << '\n' << std::endl;
-
     return p;
 }
 
@@ -142,10 +127,7 @@ void DataObject::delta_tick_extraction(){
 
     }
     std::cout << "delta tick extraction done" << std::endl;
-
-    // better delete data from pure "ticks" --> just check that im not calling the ticks anymore
-    // @ TODO: override ticks variable with process_ticks --> more clear
-
+    // clear the ticks vector for avoid to use it accidentally;
     ticks.clear();
 }
 
@@ -155,27 +137,19 @@ void DataObject::delta_time_extraction(){
     for(int i=1; i<length-1; i++){
         delta_time.push_back(time[i] - time[i-1]);
     }
+
+    std::cout << "delta time extraction done" << std::endl;
+    // clear the time vector for avoid to use it accidentally;
+    time.clear();
+
 }
 
 
 void DataObject::concat_ground_truth(){
 
-
      for(int i=0; i<length-1; i++){
         pose2d delta = t2v(v2t(ground_truth[i]).inverse() * v2t(ground_truth[i+1]));
         ground_truth_delta.push_back(delta);
     }
-    /*
-    std::cout << last_pose << std::endl;
-    poseTrajectory concat_ground_truth;
-    for(int i=0; i < length-1; i++){
-        pose2d pose = ground_truth[i];
-        concat_ground_truth.push_back(
 
-            t2v( v2t(last_pose).inverse() * v2t(pose))
-        );
-        last_pose = ground_truth[i]; 
-    }
-    ground_truth_delta = concat_ground_truth;
-    */
 }

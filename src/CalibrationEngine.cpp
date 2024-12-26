@@ -1,5 +1,13 @@
-#include "header/CalibrationEngine.hpp"
 
+/**
+ * @file CalibrationEngine.hpp
+ * @brief implementation of the calibration engine [see the header for more details]
+ *
+ * @author Gabriele G. Di Marzo [github : gg-dema]
+ */
+
+
+#include "header/CalibrationEngine.hpp"
 
 
 void CalibrationEngine::OneRound(
@@ -119,7 +127,7 @@ void CalibrationEngine::OneIteration(const DataObject& data){
     // iterate over the dataset
     for(int i=0; i<data.length-1; i++)
     { 
-        if(data.delta_time[i] < 0.02){
+        if(data.delta_time[i] < _delta_time_threshold && _first_iter){
             _statistics.skipped_data++;
             continue;
         }
@@ -152,12 +160,9 @@ void CalibrationEngine::OneIteration(const DataObject& data){
 
     // apply the boxplus operator
     perturb_parameters(dx);
-    
-    std::cout << "robot params kin: " << robot_->kinematicParams_->info() << std::endl;
-    std::cout << "robot params enc: " << robot_->encoderParams_->info() << std::endl;
-    std::cout << "robot params sensor: " << robot_->sensorParams_->info() << std::endl;
 
     _statistics.log_chi.push_back(chi_sum);
+    _first_iter = false;
 }
 
 

@@ -1,13 +1,19 @@
-// utility.hpp
+/**
+ * @file utility.hpp
+ * @brief a set of utility stuff for the project
+ * @details type definition, math transformation, file saving utility
+ * 
+ * @author Gabriele G. Di Marzo [github : gg-dema]
+ */
 
 #pragma once
 #include <vector>
 #include <math.h> 
-#include <cstdint> // define max uint32
-#include <memory>  // include shared pointers
 #include <eigen3/Eigen/Core>
 
 
+// Type definition and constants
+// ----------------------------
 constexpr int STEERING = 0;
 constexpr int DRIVING = 1;
 
@@ -20,8 +26,9 @@ using velocityInput = Eigen::Vector2d; // for reconstructed velocity
 
 
 // -----------------------------------------------------------------
-// parameters structure and perturbation utility: 
+// parameters structure
 // -----------------------------------------------------------------
+
 struct RobotParameters{
     double axis_lenght;
     double steer_offset;
@@ -30,8 +37,8 @@ struct RobotParameters{
         : axis_lenght(axis_lenght), steer_offset(steer_offset){}
 
     std::string info(){
-        return "Axis lenght: " + std::to_string(axis_lenght) + " " +
-               "Steer offset: " + std::to_string(steer_offset) + "\n";
+        return "Axis_lenght: " + std::to_string(axis_lenght) + " " +
+               "Steer_offset: " + std::to_string(steer_offset) + "\n";
     }
 
 };
@@ -44,8 +51,8 @@ struct EncoderParameters{
         : K_steering(K_steering), K_driving(K_driving){}
     
     std::string info(){
-        return "K_steering factor: " + std::to_string(K_steering) + " " +
-               "K_driving Factor: " + std::to_string(K_driving) + "\n";
+        return "K_steering_factor: " + std::to_string(K_steering) + " " +
+               "K_driving_factor: " + std::to_string(K_driving) + "\n";
     }
 };
 
@@ -58,9 +65,9 @@ struct SensorParameters{
         : x(x), y(y), theta(theta){}
     
     std::string info(){
-        return "robot 2 sensor x: " + std::to_string(x) + " " +
-               "robot 2 sensor y: " + std::to_string(y) + " " +
-               "robot 2 sensor theta: " + std::to_string(theta) + "\n";
+        return "robot2sensor_x: " + std::to_string(x) + " " +
+               "robot2sensor_y: " + std::to_string(y) + " " +
+               "robot2sensor_theta: " + std::to_string(theta) + "\n";
     }
     pose2d as_pose(){
         return pose2d(x, y, theta);
@@ -68,12 +75,31 @@ struct SensorParameters{
 };
 
 
+
+// ----------------------------
+// Math utility
+// ----------------------------
+
+// boxPlus and boxMinus
+// --------------------
 Eigen::Matrix3d v2t(const pose2d& pose);
 pose2d t2v(const Eigen::Matrix3d& T);   
 
 
-// ------
+// sin-cos expansion with taylor:
+// ------------------------------
+inline double sin_taylor_expansion(const double x){
+    return x/2 - pow(x, 3)/24 + pow(x, 5)/720;
+}
+inline double cos_taylor_expansion(const double x){
+    return 1 - pow(x, 2)/6 + pow(x, 4)/120;
+}
+    
+    
+
+// -------------------
 // file saving utility
+// -------------------
 
 void saveTrajToCSV(
     const std::vector<pose2d>& traj, 

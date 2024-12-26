@@ -3,7 +3,7 @@
 #include <utility.hpp>
 #include <iostream>
 
-TEST(BoxPlusMinus, v2tInverseTimesv2tIsIdentity) {
+TEST(BoxPlusMinus, v2t_inverse_times_v2t_Is_Identity) {
     
     double tolerance = 1e-6;
 
@@ -14,7 +14,7 @@ TEST(BoxPlusMinus, v2tInverseTimesv2tIsIdentity) {
 
 }
 
-TEST(BoxPlusMinus, t2vInverseTimesv2tIsZero) {
+TEST(BoxPlusMinus, vt2_of_t2v_inverse_times_t2v_is_zero) {
     
     double tolerance = 1e-6;
 
