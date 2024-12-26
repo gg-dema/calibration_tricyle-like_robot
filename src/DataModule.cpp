@@ -160,14 +160,22 @@ void DataObject::delta_time_extraction(){
 
 void DataObject::concat_ground_truth(){
 
-    pose2d last_pose(0.0, 0.0, 0.0);
+
+     for(int i=0; i<length-1; i++){
+        pose2d delta = t2v(v2t(ground_truth[i]).inverse() * v2t(ground_truth[i+1]));
+        ground_truth_delta.push_back(delta);
+    }
+    /*
+    std::cout << last_pose << std::endl;
     poseTrajectory concat_ground_truth;
     for(int i=0; i < length-1; i++){
+        pose2d pose = ground_truth[i];
         concat_ground_truth.push_back(
-            t2v(v2t(last_pose).inverse() * v2t(ground_truth[i]))
+
+            t2v( v2t(last_pose).inverse() * v2t(pose))
         );
         last_pose = ground_truth[i]; 
     }
-    ground_truth = concat_ground_truth;
-
+    ground_truth_delta = concat_ground_truth;
+    */
 }

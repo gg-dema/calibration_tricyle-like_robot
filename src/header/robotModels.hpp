@@ -61,7 +61,6 @@ public:
                 std::cout << encoderParams_->info();
                 std::cout << sensorParams_->info();
                 std::cout << std::endl;
-                sensor_pose_ = pose_;
                 // sensor_pose_[0] += kinematicParams_->steer_offset;
             }
 
@@ -87,10 +86,9 @@ public:
     pose2d predict_displacement(const tick64& tick);  
 
     // rollout the trajectory from the encoder measures [entire trajectory]
-    poseTrajectory rollout_trajectory(const std::vector<tick64>& encoder_measure);
+    poseTrajectory rollout_trajectory(const std::vector<tick64>& encoder_measures);
     
-
-
+    poseTrajectory rollout_trajectory_sensor(const std::vector<tick64>& encoder_measures);
     // return the pose of the robot respect the world frame at a certain time
     pose2d get_pose(){return pose_;}
 
@@ -101,11 +99,10 @@ public:
     Eigen::Vector4d get_kin_params(){
         Eigen::Vector4d params;
         params << 
-            kinematicParams_->axis_lenght, 
-            kinematicParams_->steer_offset,
             encoderParams_->K_steering,
-            encoderParams_->K_driving;
-
+            encoderParams_->K_driving,
+            kinematicParams_->axis_lenght, 
+            kinematicParams_->steer_offset;
         return params;
     }
 };  

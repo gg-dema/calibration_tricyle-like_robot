@@ -21,6 +21,7 @@ public:
     std::vector<tick64> process_ticks;
     poseTrajectory recorder_trajectory;
     poseTrajectory ground_truth;
+    poseTrajectory ground_truth_delta;
     
     // from calculation (calibration, decondin etc)
     std::vector<double> delta_time;
